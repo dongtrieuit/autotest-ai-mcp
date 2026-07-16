@@ -148,6 +148,75 @@ async function handleRequest(req) {
                 required: ["testCaseId"],
               },
             },
+            {
+              name: "create_project",
+              description: "Create a new project.",
+              inputSchema: {
+                type: "object",
+                properties: {
+                  name: { type: "string", description: "The name of the project." },
+                  baseUrl: { type: "string", description: "The base URL for tests (optional)." },
+                  description: { type: "string", description: "Optional project description." },
+                },
+                required: ["name"],
+              },
+            },
+            {
+              name: "create_screen",
+              description: "Create a new screen under a specific project.",
+              inputSchema: {
+                type: "object",
+                properties: {
+                  projectId: { type: "number", description: "The ID of the parent project." },
+                  name: { type: "string", description: "The name of the screen." },
+                  description: { type: "string", description: "Optional screen description." },
+                },
+                required: ["projectId", "name"],
+              },
+            },
+            {
+              name: "create_test_case",
+              description: "Create a new test case under a screen.",
+              inputSchema: {
+                type: "object",
+                properties: {
+                  screenId: { type: "number", description: "The ID of the parent screen." },
+                  name: { type: "string", description: "The name of the test case." },
+                  description: { type: "string", description: "Optional test case description." },
+                  priority: {
+                    type: "string",
+                    enum: ["low", "medium", "high"],
+                    description: "Optional priority level.",
+                  },
+                },
+                required: ["screenId", "name"],
+              },
+            },
+            {
+              name: "create_test_step",
+              description: "Add a step to a test case.",
+              inputSchema: {
+                type: "object",
+                properties: {
+                  testCaseId: { type: "number", description: "The ID of the parent test case." },
+                  stepOrder: { type: "number", description: "The execution order index (1-based)." },
+                  stepType: {
+                    type: "string",
+                    enum: ["ASSERT", "ACTION", "INPUT", "INFO", "GET_OTP"],
+                    description: "The type of the step.",
+                  },
+                  action: { type: "string", description: "The action to perform (e.g., 'click', 'type')." },
+                  selector: { type: "string", description: "Optional DOM selector target." },
+                  value: { type: "string", description: "Optional value input (e.g., typed text)." },
+                  expected: { type: "string", description: "Optional expected assertion string." },
+                  expectedJson: { type: "object", description: "Optional expected JSON object for assertion." },
+                  description: { type: "string", description: "Optional step description." },
+                  url: { type: "string", description: "Optional URL for navigation or verification." },
+                  otpProviderId: { type: "number", description: "Optional OTP provider ID." },
+                },
+                required: ["testCaseId", "stepOrder", "stepType"],
+              },
+            },
           ],
         },
       };
@@ -236,6 +305,71 @@ async function handleToolCall(name, args) {
         body: JSON.stringify({ test_case_id: testCaseId }),
       });
       return res.data || res;
+    }
+
+    case "create_project": {
+      const { name, baseUrl: inputBaseUrl, description } = args || {};
+      if (!name) throw new Error("name is required");
+      return makeRequest("/api/projects", {
+        method: "POST",
+        body: JSON.stringify({ name, base_url: inputBaseUrl, description }),
+      });
+    }
+
+    case "create_screen": {
+      const { projectId, name, description } = args || {};
+      if (!projectId) throw new Error("projectId is required");
+      if (!name) throw new Error("name is required");
+      return makeRequest("/api/screens", {
+        method: "POST",
+        body: JSON.stringify({ project_id: projectId, name, description }),
+      });
+    }
+
+    case "create_test_case": {
+      const { screenId, name, description, priority } = args || {};
+      if (!screenId) throw new Error("screenId is required");
+      if (!name) throw new Error("name is required");
+      return makeRequest("/api/test-cases", {
+        method: "POST",
+        body: JSON.stringify({ screen_id: screenId, name, description, priority }),
+      });
+    }
+
+    case "create_test_step": {
+      const {
+        testCaseId,
+        stepOrder,
+        stepType,
+        action,
+        selector,
+        value,
+        expected,
+        expectedJson,
+        description,
+        url,
+        otpProviderId,
+      } = args || {};
+      if (!testCaseId) throw new Error("testCaseId is required");
+      if (stepOrder === undefined) throw new Error("stepOrder is required");
+      if (!stepType) throw new Error("stepType is required");
+
+      return makeRequest("/api/test-steps", {
+        method: "POST",
+        body: JSON.stringify({
+          test_case_id: testCaseId,
+          step_order: stepOrder,
+          step_type: stepType,
+          action,
+          selector,
+          value,
+          expected,
+          expected_json: expectedJson,
+          description,
+          url,
+          otp_provider_id: otpProviderId,
+        }),
+      });
     }
 
     default:

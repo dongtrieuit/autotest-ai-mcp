@@ -11,6 +11,10 @@ Exposes the following tools to your AI agent:
 - `get_test_case_details`: Fetches steps and metadata for a specific test case.
 - `get_latest_test_runs`: Shows recent test run execution status.
 - `run_test_case`: Triggers a test execution run.
+- `create_project`: Creates a new project.
+- `create_screen`: Creates a new screen under a project.
+- `create_test_case`: Creates a new test case under a screen.
+- `create_test_step`: Adds a step to a test case.
 
 ## Setup Instructions
 
