@@ -267,6 +267,37 @@ async function handleRequest(req) {
                 required: ["projectId", "key"],
               },
             },
+            {
+              name: "generate_test_file",
+              description: "Compile and generate the executable Puppeteer script for a test case from its steps.",
+              inputSchema: {
+                type: "object",
+                properties: {
+                  testCaseId: { type: "number", description: "The ID of the parent test case." },
+                  testName: { type: "string", description: "The name of the test case." },
+                  steps: {
+                    type: "array",
+                    description: "List of step objects to compile into the test case.",
+                    items: {
+                      type: "object",
+                      properties: {
+                        id: { type: "string", description: "Optional step ID." },
+                        step_order: { type: "number", description: "Execution order index (1-based)." },
+                        step_type: { type: "string", enum: ["ASSERT", "ACTION", "INPUT", "INFO", "GET_OTP"], description: "The step type." },
+                        action: { type: "string", description: "Action name (e.g., 'click', 'type', 'navigate')." },
+                        selector: { type: "string", description: "Selector string or stringified JSON." },
+                        value: { type: "string", description: "Input value or configuration." },
+                        expected: { type: "string", description: "Expected assertion text." },
+                        url: { type: "string", description: "URL path/value." },
+                        otp_provider_id: { type: "number", description: "Optional OTP provider ID." }
+                      },
+                      required: ["step_order", "step_type"]
+                    }
+                  }
+                },
+                required: ["testCaseId", "testName", "steps"]
+              }
+            },
           ],
         },
       };
@@ -457,6 +488,19 @@ async function handleToolCall(name, args) {
       if (!key) throw new Error("key is required");
       const res = await makeRequest(`/api/projects/${projectId}/data-config/${key}`, {
         method: "DELETE",
+      });
+      return res.data || res;
+    }
+
+    case "generate_test_file": {
+      const { testCaseId, testName, steps } = args || {};
+      if (!testCaseId) throw new Error("testCaseId is required");
+      if (!testName) throw new Error("testName is required");
+      if (!steps || !Array.isArray(steps)) throw new Error("steps must be an array");
+
+      const res = await makeRequest("/api/execution/generate", {
+        method: "POST",
+        body: JSON.stringify({ testCaseId, testName, steps }),
       });
       return res.data || res;
     }
