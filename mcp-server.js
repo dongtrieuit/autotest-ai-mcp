@@ -219,6 +219,54 @@ async function handleRequest(req) {
                 required: ["testCaseId", "stepOrder", "stepType"],
               },
             },
+            {
+              name: "get_project_data_config",
+              description: "Get all data variables (testcase_data_config) for a project.",
+              inputSchema: {
+                type: "object",
+                properties: {
+                  projectId: { type: "number", description: "The unique ID of the project." },
+                },
+                required: ["projectId"],
+              },
+            },
+            {
+              name: "update_project_data_config",
+              description: "Update the entire data variables (testcase_data_config) object for a project.",
+              inputSchema: {
+                type: "object",
+                properties: {
+                  projectId: { type: "number", description: "The unique ID of the project." },
+                  dataConfig: { type: "object", description: "The complete key-value variables JSON object." },
+                },
+                required: ["projectId", "dataConfig"],
+              },
+            },
+            {
+              name: "set_project_data_config_key",
+              description: "Set or update a single variable key-value pair in a project's data config.",
+              inputSchema: {
+                type: "object",
+                properties: {
+                  projectId: { type: "number", description: "The unique ID of the project." },
+                  key: { type: "string", description: "The variable name." },
+                  value: { type: "string", description: "The value to assign to the variable." },
+                },
+                required: ["projectId", "key", "value"],
+              },
+            },
+            {
+              name: "delete_project_data_config_key",
+              description: "Delete a single variable key from a project's data config.",
+              inputSchema: {
+                type: "object",
+                properties: {
+                  projectId: { type: "number", description: "The unique ID of the project." },
+                  key: { type: "string", description: "The variable name to delete." },
+                },
+                required: ["projectId", "key"],
+              },
+            },
           ],
         },
       };
@@ -372,6 +420,45 @@ async function handleToolCall(name, args) {
           otp_provider_id: otpProviderId,
         }),
       });
+    }
+
+    case "get_project_data_config": {
+      const { projectId } = args || {};
+      if (!projectId) throw new Error("projectId is required");
+      const res = await makeRequest(`/api/projects/${projectId}/data-config`);
+      return res.data || res;
+    }
+
+    case "update_project_data_config": {
+      const { projectId, dataConfig } = args || {};
+      if (!projectId) throw new Error("projectId is required");
+      if (!dataConfig) throw new Error("dataConfig is required");
+      const res = await makeRequest(`/api/projects/${projectId}/data-config`, {
+        method: "PUT",
+        body: JSON.stringify({ data_config: dataConfig }),
+      });
+      return res.data || res;
+    }
+
+    case "set_project_data_config_key": {
+      const { projectId, key, value } = args || {};
+      if (!projectId) throw new Error("projectId is required");
+      if (!key) throw new Error("key is required");
+      const res = await makeRequest(`/api/projects/${projectId}/data-config`, {
+        method: "PATCH",
+        body: JSON.stringify({ key, value }),
+      });
+      return res.data || res;
+    }
+
+    case "delete_project_data_config_key": {
+      const { projectId, key } = args || {};
+      if (!projectId) throw new Error("projectId is required");
+      if (!key) throw new Error("key is required");
+      const res = await makeRequest(`/api/projects/${projectId}/data-config/${key}`, {
+        method: "DELETE",
+      });
+      return res.data || res;
     }
 
     default:
