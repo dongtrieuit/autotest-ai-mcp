@@ -41,19 +41,19 @@ npm install
 
 ### 3. Integration with LLM Clients
 
-You can configure your LLM client to run the MCP server either directly via **npx** (once published to NPM) or by referencing the local script path.
+You can configure your LLM client to run the MCP server either directly via **npx** from GitHub or by referencing the local script path.
 
 #### Claude Desktop
 
 Add the following to your `claude_desktop_config.json` (typically located at `~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
 
-##### Option A: Using npx (Recommended once published)
+##### Option A: Running directly from GitHub via npx (Recommended)
 ```json
 {
   "mcpServers": {
     "autotest-ai-mcp": {
       "command": "npx",
-      "args": ["-y", "autotest-ai-mcp"],
+      "args": ["-y", "github:dongtrieuit/autotest-ai-mcp"],
       "env": {
         "AUTOTEST_AI_URL": "http://localhost:3000",
         "AUTOTEST_AI_API_KEY": "your_api_key_here"
@@ -86,7 +86,7 @@ Add the following to your `claude_desktop_config.json` (typically located at `~/
 3. Configure:
    - **Name**: `autotest-ai-mcp`
    - **Type**: `stdio`
-   - **Command**: `npx -y autotest-ai-mcp` (or `node /absolute/path/to/autotest-ai-mcp/mcp-server.js` for local execution)
+   - **Command**: `npx -y github:dongtrieuit/autotest-ai-mcp` (or `node /absolute/path/to/autotest-ai-mcp/mcp-server.js` for local execution)
 4. Add environment variables:
    - `AUTOTEST_AI_URL`: `http://localhost:3000`
    - `AUTOTEST_AI_API_KEY`: `your_api_key_here`
