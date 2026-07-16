@@ -1,0 +1,21 @@
+{
+  "name": "autotest-ai-mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol (MCP) server for Autotest AI Integration",
+  "type": "module",
+  "main": "mcp-server.js",
+  "scripts": {
+    "start": "node mcp-server.js",
+    "dev": "node --watch mcp-server.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "autotest-ai"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.6.1"
+  }
+}
